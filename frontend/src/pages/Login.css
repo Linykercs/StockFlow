@@ -1,0 +1,19 @@
+.pagina-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-primaria-50);
+}
+
+.pagina-login__form {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.pagina-login__form p {
+  color: var(--cor-cinza-600);
+  margin: 0 0 var(--espaco-2);
+}

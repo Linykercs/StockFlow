@@ -1,0 +1,38 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--raio-badge);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge--em_estoque {
+  background: var(--cor-sucesso-bg);
+  color: var(--cor-sucesso-texto);
+}
+
+.badge--baixo {
+  background: var(--cor-alerta-bg);
+  color: var(--cor-alerta-texto);
+}
+
+.badge--vencendo {
+  background: var(--cor-vencendo-bg);
+  color: var(--cor-vencendo-texto);
+}
+
+.badge--vencido {
+  background: var(--cor-erro-bg);
+  color: var(--cor-erro-texto);
+}

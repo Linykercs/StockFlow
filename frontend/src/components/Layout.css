@@ -1,0 +1,44 @@
+.menu-lateral {
+  width: 240px;
+  background: var(--cor-navy-900);
+  color: var(--cor-branco);
+  padding: var(--espaco-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.menu-lateral__marca {
+  color: var(--cor-branco);
+}
+
+.menu-lateral__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.menu-lateral__nav a {
+  color: var(--cor-primaria-50);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: var(--raio-campo);
+}
+
+.menu-lateral__nav a.active {
+  background: var(--cor-primaria-500);
+  color: var(--cor-branco);
+  font-weight: 500;
+}
+
+.menu-lateral__usuario {
+  margin-top: auto;
+  border-top: 1px solid var(--cor-primaria-500);
+  padding-top: var(--espaco-2);
+  font-size: var(--tamanho-apoio);
+}
+
+.menu-lateral__perfil {
+  color: var(--cor-primaria-50);
+  margin-bottom: var(--espaco-2);
+}

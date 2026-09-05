@@ -1,0 +1,46 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.campo__rotulo {
+  font-weight: 500;
+  font-size: 13px;
+  color: #4a443b;
+}
+
+.campo__container {
+  background: var(--cor-branco);
+  border: 1px solid var(--cor-cinza-300);
+  border-radius: var(--raio-campo);
+  padding: 0 14px;
+}
+
+.campo__container input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 13px 0;
+  font-family: var(--fonte-corpo);
+  font-size: 15px;
+  color: var(--cor-cinza-900);
+}
+
+.campo__container--erro {
+  border: 2px solid var(--cor-erro);
+}
+
+.campo__apoio {
+  margin: 0;
+  font-size: 12px;
+  color: var(--cor-cinza-600);
+}
+
+.campo__erro {
+  margin: 0;
+  font-size: 12px;
+  color: var(--cor-erro);
+}
