@@ -12,7 +12,7 @@ Protótipo no Figma: https://www.figma.com/design/IZ7Ym9kOcdTrWE07atfkR6 (págin
 
 | Parte | Situação |
 |---|---|
-| Banco de dados | Pronto: schema, modelos conceitual e lógico, dados de exemplo |
+| Banco de dados | Pronto: schema, modelos conceitual e lógico, dicionário de dados, dados de exemplo e guia para o backend |
 | Backend (Java 21, Spring Boot 3) | A fazer |
 | Frontend (React, TypeScript, Vite) | A fazer |
 
@@ -26,6 +26,8 @@ backend/
 frontend/
 docs/
   banco-de-dados.md                    tabelas, diagrama e onde cada requisito fica no banco
+  dicionario-de-dados.md               cada coluna com tipo, obrigatoriedade e descrição
+  guia-banco-para-o-backend.md         como o backend deve usar o banco e quais regras ficam no código
   modelo-de-dados.drawio               modelo conceitual (Chen) e modelo lógico
 ```
 
