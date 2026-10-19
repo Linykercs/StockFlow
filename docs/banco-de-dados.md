@@ -6,6 +6,8 @@ e segue o Documento de Requisitos (RF01 a RF10, RN01 a RN05).
 
 Os modelos conceitual (notação de Chen) e lógico estão em
 [`modelo-de-dados.drawio`](modelo-de-dados.drawio), que abre em [app.diagrams.net](https://app.diagrams.net).
+Cada coluna está descrita no [dicionário de dados](dicionario-de-dados.md), e o
+[guia para o backend](guia-banco-para-o-backend.md) explica quais regras o banco garante e quais ficam no código.
 
 ## Diagrama
 
