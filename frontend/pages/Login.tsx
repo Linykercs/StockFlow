@@ -23,7 +23,7 @@ function Login() {
           <img src={logo} alt="" className="h-8 w-8" />
           <h1 className="brand-font text-2xl font-semibold">StockFlow</h1>
         </div>
-        <p className="max-w-[340px] text-[15px] leading-6 text-verdeTexto">Sistema de Gestão de Estoque para o Supermercado Irmãos Costa.</p>
+        <p className="max-w-[340px] text-[15px] leading-6 text-verdeTexto">Sistema de Gestão de Estoque para supermercado.</p>
       </section>
       <section className="flex items-center justify-center px-6 py-12">
         <form onSubmit={submit} className="w-full max-w-md">
