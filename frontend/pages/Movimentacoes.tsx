@@ -12,7 +12,14 @@ function Movimentacoes() {
   const [user, setUser] = useState("Todos");
   const [query, setQuery] = useState("");
   const unique = (values: string[]) => [...new Set(values)].sort();
-  const filtered = useMemo(() => movements.filter((movement) => (type === "Todos" || movement.type === type) && (product === "Todos" || movement.productName === product) && (batch === "Todos" || movement.batchCode === batch) && (user === "Todos" || movement.user === user) && movement.productName.toLowerCase().includes(query.toLowerCase())), [movements, type, product, batch, user, query]);
+  const desde = useMemo(() => {
+    const dias = { "Hoje": 0, "7 dias": 7, "30 dias": 30 }[period];
+    if (dias === undefined) return "";
+    const data = new Date();
+    data.setDate(data.getDate() - dias);
+    return data.toISOString().slice(0, 10);
+  }, [period]);
+  const filtered = useMemo(() => movements.filter((movement) => movement.createdAt.slice(0, 10) >= desde && (type === "Todos" || movement.type === type) && (product === "Todos" || movement.productName === product) && (batch === "Todos" || movement.batchCode === batch) && (user === "Todos" || movement.user === user) && movement.productName.toLowerCase().includes(query.toLowerCase())), [movements, desde, type, product, batch, user, query]);
   const entrances = filtered.filter((item) => item.type === "Entrada").reduce((sum, item) => sum + item.quantity, 0);
   const exits = filtered.filter((item) => item.type === "Saída").reduce((sum, item) => sum + item.quantity, 0);
   const writeOffs = filtered.filter((item) => item.type === "Baixa").reduce((sum, item) => sum + item.quantity, 0);
@@ -28,7 +35,7 @@ function Movimentacoes() {
   return (
     <div className="page-shell">
       <header className="page-header"><div><h1 className="page-title">Movimentações</h1><span className="page-subtitle">Histórico completo de entradas, saídas e baixas.</span></div><button className="btn btn-primary" onClick={exportCsv}><HiOutlineArrowDownTray /> Exportar CSV</button></header>
-      <section className="mb-4 flex flex-wrap gap-2">{["Hoje", "7 dias", "30 dias", "Personalizado"].map((item) => <button key={item} className={`btn ${period === item ? "btn-primary" : "btn-secondary"}`} onClick={() => setPeriod(item)}>{item}</button>)}</section>
+      <section className="mb-4 flex flex-wrap gap-2">{["Hoje", "7 dias", "30 dias", "Últimas 100"].map((item) => <button key={item} className={`btn ${period === item ? "btn-primary" : "btn-secondary"}`} onClick={() => setPeriod(item)}>{item}</button>)}</section>
       <section className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_repeat(4,150px)]">
         <label className="relative"><HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-pretoClaro" /><input className="control pl-10" placeholder="Buscar produto..." value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         <select className="control" value={type} onChange={(event) => setType(event.target.value)}><option>Todos</option><option>Entrada</option><option>Saída</option><option>Baixa</option></select>

@@ -2,18 +2,34 @@ import { useState, type FormEvent } from "react";
 import { HiOutlineEye, HiOutlineEyeSlash } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 import logo from "../src/assets/logo.png";
+import { useAuth } from "../context/AuthContext";
+import { mensagemDeErro } from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("amanda@irmaoscosta.com.br");
-  const [password, setPassword] = useState("stockflow");
+  const { entrar } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const login = async (destino: string) => {
+    if (!email.trim() || !password.trim()) { setError("Informe seu e-mail e senha para continuar."); return; }
+    setSending(true);
+    try {
+      await entrar(email.trim(), password);
+      navigate(destino);
+    } catch (erro) {
+      setError(mensagemDeErro(erro));
+    } finally {
+      setSending(false);
+    }
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (!email.trim() || !password.trim()) { setError("Informe seu e-mail e senha para continuar."); return; }
-    navigate("/painel");
+    login("/painel");
   };
 
   return (
@@ -43,12 +59,12 @@ function Login() {
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between text-xs">
-            <label className="flex items-center gap-2 text-pretoClaro"><input type="checkbox" className="accent-verdeEscuro" /> Manter conectado</label>
-            <button type="button" className="font-semibold text-verdeClaro">Esqueci minha senha</button>
+            <label className="flex items-center gap-2 text-pretoClaro"><input type="checkbox" className="accent-verdeEscuro" defaultChecked /> Manter conectado</label>
+            <span className="text-pretoClaro">Esqueceu a senha? Fale com o administrador.</span>
           </div>
           {error && <p className="mt-4 rounded-md bg-vermelhoClaro p-3 text-xs text-vermelhoEscuro">{error}</p>}
-          <button className="btn btn-primary mt-6 w-full" type="submit">Entrar</button>
-          <button type="button" onClick={() => navigate("/recebimento")} className="mt-4 w-full text-center text-xs font-semibold text-verdeClaro underline-offset-4 hover:underline">Acessar modo de recebimento móvel</button>
+          <button className="btn btn-primary mt-6 w-full" type="submit" disabled={sending}>{sending ? "Entrando..." : "Entrar"}</button>
+          <button type="button" onClick={() => login("/recebimento")} disabled={sending} className="mt-4 w-full text-center text-xs font-semibold text-verdeClaro underline-offset-4 hover:underline">Entrar no modo de recebimento móvel</button>
         </form>
       </section>
     </main>

@@ -13,18 +13,20 @@ Protótipo no Figma: https://www.figma.com/design/IZ7Ym9kOcdTrWE07atfkR6 (págin
 | Parte | Situação |
 |---|---|
 | Banco de dados | Pronto: schema, modelos conceitual e lógico, dicionário de dados, dados de exemplo e guia para o backend |
-| Backend (Java 21, Spring Boot 3) | A fazer |
-| Frontend (React, TypeScript, Vite) | A fazer |
+| Backend (Java 21, Spring Boot 3) | Pronto: login JWT, cadastros, entrada e saída por lote, recebimento pela nota, alertas, painel e relatórios. Contrato em `docs/api.md` |
+| Frontend (React, TypeScript, Vite) | Pronto: telas ligadas à API, com leitura de QR da nota e código de barras pela câmera |
 
 ## estrutura
 
 ```
 backend/
+  src/main/java/br/com/stockflow/      API em Spring Boot (controller, service, repository, entity)
   src/main/resources/db/
     migration/V1__schema_inicial.sql   schema do banco, executado pelo Flyway
     dados-exemplo.sql                  dados de teste para o banco local
-frontend/
+frontend/                              telas em React (pages, Components, services/api.ts)
 docs/
+  api.md                               endpoints, regras e formatos da API
   banco-de-dados.md                    tabelas, diagrama e onde cada requisito fica no banco
   dicionario-de-dados.md               cada coluna com tipo, obrigatoriedade e descrição
   guia-banco-para-o-backend.md         como o backend deve usar o banco e quais regras ficam no código
@@ -107,4 +109,25 @@ DROP DATABASE stockflow;
 
 E repita os passos 2 e 3.
 
-Quando o backend existir, o Flyway vai criar as tabelas sozinho ao subir o sistema. Nesse caso, rode só o passo 2 e deixe o banco vazio; os dados de exemplo entram depois.
+Com o backend, o Flyway cria as tabelas sozinho quando o sistema sobe. Nesse caso, rode só o passo 2, suba o backend uma vez e depois rode o `dados-exemplo.sql`.
+
+## rodar o sistema
+
+Precisa do banco do passo anterior, do Java 21 e do Node 20 ou mais novo.
+
+Backend, na pasta `backend`:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+A API sobe em http://localhost:8080 e a documentação (Swagger) fica em http://localhost:8080/docs.
+
+Frontend, em outro terminal, na pasta `frontend`:
+
+```powershell
+npm install
+npm run dev
+```
+
+O sistema abre em http://localhost:5173. O Vite repassa as chamadas de `/api` para o backend na porta 8080, então os dois precisam estar rodando. O login usa os usuários de exemplo do passo 4.

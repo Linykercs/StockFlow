@@ -1,4 +1,4 @@
-import type { Produto, ProductStatus } from "../types/Produto";
+import type { Produto, ProductStatus, Unit } from "../types/Produto";
 
 export const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -24,6 +24,14 @@ export const daysUntil = (value: string) => {
 export const getStock = (product: Produto) =>
   product.batches.reduce((total, batch) => total + Math.max(0, batch.quantity), 0);
 
+// RN02: lote vencido conta no total, mas não pode sair por venda
+export const getAvailableStock = (product: Produto) =>
+  product.batches
+    .filter((batch) => !batch.blocked && !(batch.expiresAt && daysUntil(batch.expiresAt) < 0))
+    .reduce((total, batch) => total + batch.quantity, 0);
+
+export const unitLabel: Record<Unit, string> = { UNIDADE: "un.", KG: "kg", LITRO: "L" };
+
 export const getProductStatus = (product: Produto): ProductStatus => {
   const stock = getStock(product);
   if (stock <= 0) return "Sem estoque";
@@ -32,11 +40,11 @@ export const getProductStatus = (product: Produto): ProductStatus => {
 };
 
 export const getBatchState = (expiresAt: string, blocked?: boolean) => {
-  if (blocked) return { type: "blocked", label: "Bloqueado" } as const;
+  if (blocked) return { type: "blocked", label: "Baixado" } as const;
+  if (!expiresAt) return { type: "valid", label: "Sem validade" } as const;
   const days = daysUntil(expiresAt);
   if (days < 0) return { type: "expired", label: "Lote vencido" } as const;
   if (days <= 7) return { type: "expiring", label: days === 0 ? "Vence hoje" : `Vence em ${days} dias` } as const;
   return { type: "valid", label: "Dentro da validade" } as const;
 };
 
-export const uid = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
