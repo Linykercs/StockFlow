@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: stockflow-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/stockflow}
+    username: ${DB_USER:stockflow}
+    password: ${DB_PASSWORD:stockflow}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    # aceita o banco que já foi criado à mão pelo README como se fosse a versão 1
+    baseline-on-migrate: true
+    baseline-version: 1
+
+server:
+  port: ${SERVER_PORT:8080}
+
+stockflow:
+  jwt:
+    segredo: ${JWT_SEGREDO:segredo-local-do-stockflow-troque-antes-de-publicar}
+    validade-minutos: 480
+  cors:
+    origens: http://localhost:5173
+
+springdoc:
+  swagger-ui:
+    path: /docs
