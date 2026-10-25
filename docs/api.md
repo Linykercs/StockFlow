@@ -100,13 +100,15 @@ Só ADMINISTRADOR.
 | `GET /usuarios/{id}` | Um usuário |
 | `POST /usuarios` | Cria |
 | `PUT /usuarios/{id}` | Edita. `senha` é opcional, só muda se vier preenchida |
-| `DELETE /usuarios/{id}` | Inativa (`ativo = false`) |
+| `DELETE /usuarios/{id}` | Inativa (`ativo = false`). Resposta `204` sem corpo |
 
 Corpo do POST e do PUT:
 
 ```json
 { "nome": "Katia Costa", "email": "katia@irmaoscosta.com.br", "senha": "trocar123", "perfil": "OPERADOR", "setor": "Mercearia", "ativo": true }
 ```
+
+A senha precisa ter pelo menos 6 caracteres. O administrador não consegue inativar o próprio usuário (`400`).
 
 Resposta: o usuário sem a senha.
 
@@ -186,7 +188,7 @@ No PUT, se `precoEntrada` ou `precoSaida` mudar, o backend grava uma linha em `h
 
 ### DELETE /produtos/{id}
 
-ADMINISTRADOR e GERENTE. Inativa o produto (`ativo = false`). Lotes e movimentações continuam no histórico.
+ADMINISTRADOR e GERENTE. Inativa o produto (`ativo = false`) e responde `204` sem corpo. Lotes e movimentações continuam no histórico.
 
 ### GET /produtos/{id}/historico-precos
 
@@ -369,17 +371,71 @@ Lê a view `vw_alertas`.
 
 ## relatórios (Kaic, RF06, RN05)
 
-Só ADMINISTRADOR e GERENTE. Filtros comuns: `inicio`, `fim`, `categoriaId`.
+Só ADMINISTRADOR e GERENTE. Todos aceitam `categoriaId`. Os que têm período aceitam `inicio` e `fim` (`2026-10-01`).
+Sem datas, o período é dos últimos 6 meses: do dia 1 de cinco meses atrás até hoje. O dia final entra inteiro.
 
-| Rota | Conteúdo |
-|---|---|
-| `GET /relatorios/estoque` | Por produto: quantidade, valor de custo e valor de venda |
-| `GET /relatorios/movimentacoes` | Totais de entrada e saída no período, por tipo e motivo |
-| `GET /relatorios/perdas` | Saídas com motivo `PERDA` ou `VENCIMENTO`, total por mês e lista de itens |
-| `GET /relatorios/vencimentos` | Lotes ativos em ordem de validade |
-| `GET /relatorios/precos` | Alterações de preço no período, com a margem entre entrada e saída |
+### GET /relatorios/estoque
 
-O formato de cada um fica a cargo do Kaic, desde que seja anotado aqui antes de a Amanda integrar.
+Valor de custo = quantidade total x preço de entrada. Valor de venda = quantidade disponível x preço de saída.
+
+```json
+{
+  "itens": [
+    { "produtoId": 1, "codigo": "P001", "nome": "Arroz tipo 1 5 kg", "categoria": "Mercearia", "unidadeMedida": "UNIDADE",
+      "estoqueMinimo": 40, "quantidadeTotal": 36, "quantidadeDisponivel": 30, "valorCusto": 680.40, "valorVenda": 837.00 }
+  ],
+  "valorTotalCusto": 1794.24,
+  "valorTotalVenda": 2438.29
+}
+```
+
+### GET /relatorios/movimentacoes
+
+```json
+{
+  "inicio": "2026-05-01",
+  "fim": "2026-10-25",
+  "valorTotalEntradas": 609.40,
+  "valorTotalSaidas": 361.84,
+  "totais": [
+    { "tipo": "ENTRADA", "motivo": "RECEBIMENTO", "registros": 2, "quantidade": 72.5, "valorTotal": 609.40 },
+    { "tipo": "SAIDA", "motivo": "VENDA", "registros": 3, "quantidade": 19.915, "valorTotal": 326.44 }
+  ]
+}
+```
+
+### GET /relatorios/perdas
+
+Saídas com motivo `PERDA` ou `VENCIMENTO`. `porMes` traz todos os meses do período, inclusive os sem perda, para o gráfico.
+
+```json
+{
+  "inicio": "2026-05-01",
+  "fim": "2026-10-25",
+  "valorTotal": 35.40,
+  "porMes": [ { "mes": "2026-09", "valorTotal": 0 }, { "mes": "2026-10", "valorTotal": 35.40 } ],
+  "itens": [
+    { "dataHora": "2026-10-24T15:15:31", "produto": { "id": 7, "nome": "Pão de forma 500 g" }, "lote": "LT-B-0140",
+      "motivo": "VENCIMENTO", "quantidade": 3, "valorTotal": 18.60, "observacao": "Descarte de vencidos" }
+  ]
+}
+```
+
+### GET /relatorios/vencimentos
+
+Lotes ativos com saldo, do que vence antes para o que vence depois. Cada item tem o formato da seção de lotes (com `situacaoValidade` e `diasParaVencer`).
+
+### GET /relatorios/precos
+
+Alterações de preço no período. A margem é quanto o preço de saída está acima do de entrada, em %.
+
+```json
+[
+  { "alteradoEm": "2026-10-15T15:15:31", "produto": { "id": 1, "nome": "Arroz tipo 1 5 kg" }, "usuario": "Gerente StockFlow",
+    "precoEntradaAnterior": 18.40, "precoEntradaNovo": 18.90, "precoSaidaAnterior": 26.90, "precoSaidaNovo": 27.90,
+    "margemAnterior": 46.2, "margemNova": 47.6 }
+]
+```
 
 ## configurações (Kaic)
 
