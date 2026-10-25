@@ -231,8 +231,9 @@ Tira do estoque todo o saldo do lote vencido ou estragado e fecha o lote (RN02).
 { "situacao": "DESCARTADO", "motivo": "VENCIMENTO", "observacao": "Embalagem estufada" }
 ```
 
-`situacao` aceita `BAIXADO` ou `DESCARTADO`. `motivo` aceita `VENCIMENTO` ou `PERDA`.
-Grava uma movimentação de `SAIDA` com a quantidade que restava, zera o lote e muda a situação. Resposta: a movimentação gravada.
+`situacao` aceita `BAIXADO` ou `DESCARTADO`. `motivo` aceita `VENCIMENTO` (só para lote vencido) ou `PERDA` (avaria, qualquer lote).
+Grava uma movimentação de `SAIDA` com a quantidade que restava, pelo custo do lote, zera o lote e muda a situação.
+Resposta `201`: a movimentação gravada. Lote já baixado ou sem saldo volta `400`.
 
 ## movimentações (Cauã, RF02, RF04, RN01, RN03)
 
@@ -252,8 +253,14 @@ O usuário e a data e hora de toda movimentação vêm do token e do servidor, n
 }
 ```
 
-Se o produto já tem lote com esse código, soma no lote. Senão, cria o lote.
+Se o produto já tem lote com esse código, soma no lote. Senão, cria o lote com `valorUnitario` como custo.
 `motivo` aceita `RECEBIMENTO`, `DEVOLUCAO` ou `AJUSTE`. Resposta `201`: a movimentação gravada.
+
+O backend recusa com `400`:
+
+- lote novo com validade já passada;
+- lote que já existe com outra `dataValidade`, ou que já foi baixado;
+- quantidade com fração em produto de `unidadeMedida` `UNIDADE` (vale também para a saída e o recebimento).
 
 ### POST /movimentacoes/saida
 
@@ -268,18 +275,22 @@ Se o produto já tem lote com esse código, soma no lote. Senão, cria o lote.
 ```
 
 `motivo` aceita `VENDA`, `PERDA`, `VENCIMENTO` ou `AJUSTE`.
-`loteIds` é opcional. Sem ele, o backend tira primeiro do lote que vence antes.
+`loteIds` é opcional. Sem ele, o backend tira primeiro do lote que vence antes, pulando os vencidos (ou, com motivo `VENCIMENTO`, usando só os vencidos).
+
+Venda sai pelo `precoSaida` do produto. Perda, vencimento e ajuste saem pelo custo do lote.
 
 O backend recusa com `400`:
 
-- quantidade maior que o saldo dos lotes (RN01);
-- saída de lote vencido com motivo diferente de `VENCIMENTO` (RN02).
+- quantidade maior que o saldo dos lotes (RN01). A mensagem traz o disponível;
+- saída de lote vencido com motivo diferente de `VENCIMENTO` (RN02);
+- motivo `VENCIMENTO` em lote que ainda não venceu;
+- lote em `loteIds` que é de outro produto ou já foi baixado.
 
 Se a saída passar por mais de um lote, grava uma movimentação por lote. Resposta `201`: a lista das movimentações gravadas.
 
 ### GET /movimentacoes
 
-Paginada. Filtros opcionais: `inicio` e `fim` (datas), `tipo`, `motivo`, `produtoId`, `usuarioId`. Ordem da mais nova para a mais antiga.
+Paginada (`pagina` a partir de 0, `tamanho` padrão 20, máximo 100). Filtros opcionais: `inicio` e `fim` (datas, o dia final entra inteiro), `tipo`, `motivo`, `produtoId`, `usuarioId`. Ordem da mais nova para a mais antiga.
 
 Cada item:
 
@@ -335,7 +346,34 @@ Conferência de um item:
 ```
 
 Se a conferida for diferente da quantidade da nota, `observacao` é obrigatória e o recebimento passa para `COM_DIVERGENCIA`.
-Concluir só é aceito com todos os itens conferidos.
+Com quantidade maior que zero, `codigoLote` é obrigatório e a validade não pode ter passado. Item que não veio vai com `quantidadeConferida: 0` e a observação.
+Concluir só é aceito com todos os itens conferidos. Nota concluída ou cancelada não aceita mais mudança (`400`).
+
+Resposta de todas as rotas (a lista traz um destes por nota):
+
+```json
+{
+  "id": 2,
+  "fornecedor": { "id": 2, "nome": "Laticínios Serra Azul" },
+  "usuario": { "id": 3, "nome": "Operador StockFlow" },
+  "numeroNota": "45900",
+  "serieNota": "1",
+  "chaveAcesso": "31261012345678000190550010000458721000458720",
+  "dataEmissao": "2026-10-24",
+  "status": "COM_DIVERGENCIA",
+  "criadoEm": "2026-10-25T15:26:54",
+  "concluidoEm": null,
+  "totalItens": 3,
+  "itensConferidos": 1,
+  "valorNota": 506.20,
+  "itens": [
+    { "id": 3, "produtoId": 3, "produtoNome": "Leite integral 1 L", "unidadeMedida": "LITRO",
+      "quantidadeNota": 80, "quantidadeConferida": 74, "valorUnitario": 3.49,
+      "codigoLote": "LT-L-1001", "dataValidade": "2026-12-10", "observacao": "6 caixas amassadas devolvidas",
+      "divergente": true }
+  ]
+}
+```
 
 ## painel e alertas (Cauã, RF05, RF06)
 
@@ -350,7 +388,7 @@ Lê a view `vw_alertas`.
 ]
 ```
 
-`tipo` é `ESTOQUE_BAIXO`, `LOTE_VENCENDO` ou `LOTE_VENCIDO`.
+`tipo` é `ESTOQUE_BAIXO`, `LOTE_VENCENDO` ou `LOTE_VENCIDO`. Ordem: vencidos, vencendo e depois estoque baixo.
 
 ### GET /painel
 
@@ -367,7 +405,7 @@ Lê a view `vw_alertas`.
 }
 ```
 
-`valorTotalEstoque` soma `quantidadeAtual * precoCusto` dos lotes ativos.
+`valorTotalEstoque` soma `quantidadeAtual * precoCusto` dos lotes ativos (sem custo no lote, usa o `precoEntrada` do produto). `movimentacoesHoje` traz as de hoje, da mais nova para a mais antiga.
 
 ## relatórios (Kaic, RF06, RN05)
 

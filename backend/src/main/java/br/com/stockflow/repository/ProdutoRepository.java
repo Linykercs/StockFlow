@@ -29,6 +29,8 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Query("select p from Produto p left join fetch p.categoria left join fetch p.fornecedor where p.id = :id and p.ativo = true")
     Optional<Produto> buscarAtivo(Long id);
 
+    long countByAtivoTrue();
+
     boolean existsByCodigoIgnoreCase(String codigo);
 
     boolean existsByCodigoIgnoreCaseAndIdNot(String codigo, Long id);
