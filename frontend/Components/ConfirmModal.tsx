@@ -29,8 +29,9 @@ export default function ConfirmModal({ open, title, description, confirmLabel = 
         <h2 id="confirm-title" className="brand-font mb-2 text-xl font-bold text-verdeEscuro">{title}</h2>
         <div className="text-sm leading-6 text-pretoClaro">{description}</div>
         <div className="mt-7 flex justify-end gap-3">
-          <button className="btn btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className={`btn ${danger ? "btn-danger" : "btn-primary"}`} onClick={onConfirm}>{confirmLabel}</button>
+          {/* type="button": a janela pode ficar dentro de um formulário, e sem isso o clique também envia o formulário */}
+          <button type="button" className="btn btn-secondary" onClick={onClose}>Cancelar</button>
+          <button type="button" className={`btn ${danger ? "btn-danger" : "btn-primary"}`} onClick={onConfirm}>{confirmLabel}</button>
         </div>
       </section>
     </div>
