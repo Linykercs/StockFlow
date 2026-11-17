@@ -19,14 +19,15 @@ spring:
     baseline-version: 1
 
 server:
-  port: ${SERVER_PORT:8080}
+  # no Render a porta real vem na variável PORT; localmente cai no SERVER_PORT ou 8080
+  port: ${PORT:${SERVER_PORT:8080}}
 
 stockflow:
   jwt:
     segredo: ${JWT_SEGREDO:segredo-local-do-stockflow-troque-antes-de-publicar}
     validade-minutos: 480
   cors:
-    origens: http://localhost:5173
+    origens: ${STOCKFLOW_CORS_ORIGENS:http://localhost:5173}
 
 springdoc:
   swagger-ui:
