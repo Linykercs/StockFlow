@@ -42,10 +42,15 @@ function Recebimento() {
 
   const changeProduct = (id: string) => { setProductId(id); const selected = products.find((item) => item.id === id); if (selected) setUnitValue(String(selected.costPrice)); };
 
-  // o código lido pode ser o código de barras do produto
+  // o código lido pode ser o código de barras (EAN) ou o código interno do produto (QR Code da etiqueta impressa)
+  const encontrarPorCodigo = (valor: string) => {
+    const texto = valor.trim();
+    return products.find((item) => (item.barcode && item.barcode === texto) || item.code === texto);
+  };
+
   const lerCodigo = (valor: string) => {
     setCode(valor);
-    const encontrado = products.find((item) => item.barcode && item.barcode === valor.trim());
+    const encontrado = encontrarPorCodigo(valor);
     if (encontrado) changeProduct(encontrado.id);
   };
 
@@ -73,13 +78,13 @@ function Recebimento() {
     }
     const valor = texto.trim();
     setCode(valor);
-    const encontrado = products.find((item) => item.barcode && item.barcode === valor);
+    const encontrado = encontrarPorCodigo(valor);
     if (encontrado) {
       setProductId(encontrado.id);
       setUnitValue(String(encontrado.costPrice));
       setAviso(`Produto encontrado: ${encontrado.name}.`);
     } else {
-      setAviso(`Código ${valor} lido, mas nenhum produto tem esse código de barras.`);
+      setAviso(`Código ${valor} lido, mas nenhum produto tem esse código.`);
     }
   }, [products]);
 

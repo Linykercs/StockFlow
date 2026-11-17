@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { HiOutlineTrash } from "react-icons/hi2";
 import { useNavigate, useParams } from "react-router-dom";
 import ConfirmModal from "../Components/ConfirmModal";
+import QrCodeProduto from "../Components/QrCodeProduto";
 import { useStock } from "../context/StockContext";
 import { mensagemDeErro } from "../services/api";
 import type { NewProductInput, Unit } from "../types/Produto";
@@ -61,7 +62,7 @@ function NovoProduto() {
     <form className="page-shell" onSubmit={submit}>
       <header className="page-header"><div><h1 className="page-title">{editing ? "Editar produto" : "Novo produto"}</h1><span className="page-subtitle">{editing ? "Atualize os dados cadastrais e valores." : "Cadastre o item e seu primeiro lote."}</span></div></header>
       {error && <div className="mb-5 rounded-lg border border-[#ecc8be] bg-vermelhoClaro p-3 text-sm text-vermelhoEscuro">{error}</div>}
-      <div className={`grid gap-5 ${editing ? "xl:grid-cols-1" : "xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]"}`}>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
         <section className="card p-5">
           <h2 className="section-title mb-5">Dados do produto</h2>
           <div className="grid gap-5 sm:grid-cols-2">
@@ -73,6 +74,7 @@ function NovoProduto() {
             <div className="field"><label htmlFor="minimum">Estoque mínimo *</label><input id="minimum" className="control" type="number" min="0" step="any" value={form.minimumStock} onChange={(event) => set("minimumStock", event.target.value)} /></div>
           </div>
         </section>
+        {editing && current && <QrCodeProduto codigo={current.code} nome={current.name} />}
         {!editing && <section className="card p-5">
           <h2 className="section-title mb-5">Primeiro lote</h2>
           <div className="grid gap-4">
