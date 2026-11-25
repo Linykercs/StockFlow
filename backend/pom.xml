@@ -53,6 +53,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Base32 do segredo TOTP (RF?? autenticação em duas etapas) -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

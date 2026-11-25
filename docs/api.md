@@ -69,13 +69,35 @@ Listas que podem crescer muito (movimentações) usam `?pagina=0&tamanho=20` e r
 
 ## login (Kaic)
 
+Login em duas etapas: primeiro a senha, depois o código de um app autenticador (TOTP, tipo Google
+Authenticator). Obrigatório pra todo usuário.
+
 ### POST /auth/login
 
 ```json
 { "email": "gerente@stockflow.com.br", "senha": "stockflow123" }
 ```
 
-Resposta `200`:
+E-mail ou senha errados, ou usuário inativo: `401` com a mensagem "E-mail ou senha inválidos.".
+
+Com a senha certa, a resposta `200` não devolve token ainda — devolve um desafio do autenticador:
+
+```json
+{ "status": "CONFIGURAR_MFA", "loginToken": "eyJhbGciOi...", "otpauthUri": "otpauth://totp/StockFlow:gerente@stockflow.com.br?secret=...&issuer=StockFlow&digits=6&period=30" }
+```
+
+`status` é `CONFIGURAR_MFA` só na primeira vez que o usuário loga (o front gera um QR Code a partir do
+`otpauthUri` pra ele escanear com o app autenticador). Da segunda vez em diante, `status` vem
+`INFORMAR_CODIGO` e `otpauthUri` vem `null` — o front só pede o código de 6 dígitos que o app já está
+gerando. `loginToken` vale por 5 minutos.
+
+### POST /auth/login/confirmar
+
+```json
+{ "loginToken": "eyJhbGciOi...", "codigo": "123456" }
+```
+
+Resposta `200`, igual ao login de antes:
 
 ```json
 {
@@ -84,7 +106,8 @@ Resposta `200`:
 }
 ```
 
-E-mail ou senha errados, ou usuário inativo: `401` com a mensagem "E-mail ou senha inválidos.".
+Código errado ou `loginToken` vencido/inválido: `401` com a mensagem "Código inválido ou login
+vencido. Faça login novamente." — nesse caso o front tem que voltar pro formulário de e-mail e senha.
 
 ### GET /auth/me
 

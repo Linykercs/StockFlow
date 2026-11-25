@@ -43,10 +43,10 @@ function Recebimento() {
   const changeProduct = (id: string) => { setProductId(id); const selected = products.find((item) => item.id === id); if (selected) setUnitValue(String(selected.costPrice)); };
 
   // o código lido pode ser o código de barras (EAN) ou o código interno do produto (QR Code da etiqueta impressa)
-  const encontrarPorCodigo = (valor: string) => {
+  const encontrarPorCodigo = useCallback((valor: string) => {
     const texto = valor.trim();
     return products.find((item) => (item.barcode && item.barcode === texto) || item.code === texto);
-  };
+  }, [products]);
 
   const lerCodigo = (valor: string) => {
     setCode(valor);
@@ -86,7 +86,7 @@ function Recebimento() {
     } else {
       setAviso(`Código ${valor} lido, mas nenhum produto tem esse código.`);
     }
-  }, [products]);
+  }, [encontrarPorCodigo]);
 
   const identify = () => executar(async () => {
     if (!nota.trim() || !product || expectedNumber <= 0) throw new Error("Informe o número da nota, o produto e a quantidade da nota.");

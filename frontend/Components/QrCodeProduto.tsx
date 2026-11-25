@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
-import QRCode from "qrcode";
 import { HiOutlineArrowDownTray } from "react-icons/hi2";
+import useQrCode from "../hooks/useQrCode";
 
 // Gera o QR Code do código interno do produto (form.code), pra imprimir e colar na caixa/prateleira.
 // O mesmo leitor da tela de recebimento (LeitorCodigo) já lê QR Code, então basta escanear essa etiqueta.
 export default function QrCodeProduto({ codigo, nome }: { codigo: string; nome: string }) {
-  const [imagem, setImagem] = useState("");
-
-  useEffect(() => {
-    let ativo = true;
-    QRCode.toDataURL(codigo, { width: 220, margin: 1 })
-      .then((url) => { if (ativo) setImagem(url); })
-      .catch(() => { if (ativo) setImagem(""); });
-    return () => { ativo = false; };
-  }, [codigo]);
+  const imagem = useQrCode(codigo);
 
   return (
     <section className="card grid place-items-center gap-3 p-5 text-center">
