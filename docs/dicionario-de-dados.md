@@ -19,6 +19,8 @@ Contas de acesso ao sistema, com perfil e setor (RF07).
 | `perfil` | VARCHAR(20) | sim |  |  | ADMINISTRADOR, GERENTE ou OPERADOR. Define o que o usuário pode fazer. |
 | `setor` | VARCHAR(60) | não |  |  | Setor de trabalho do gerente ou do operador. |
 | `ativo` | BOOLEAN | sim |  | TRUE | Falso quando o registro foi desativado. Nada é apagado de verdade. |
+| `mfa_secret` | VARCHAR(64) | não |  |  | Segredo TOTP (Base32) do autenticador. Gerado pelo backend no primeiro login. |
+| `mfa_ativo` | BOOLEAN | sim |  | FALSE | Verdadeiro depois que o usuário confirma o primeiro código do autenticador. |
 | `criado_em` | TIMESTAMP | sim |  | agora | Data e hora em que o registro foi criado. |
 | `atualizado_em` | TIMESTAMP | sim |  | agora | Data e hora da última alteração. O backend atualiza. |
 

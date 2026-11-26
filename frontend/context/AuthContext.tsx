@@ -1,12 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, lerToken, quandoSessaoExpirar, salvarToken } from "../services/api";
-import type { ApiUsuario } from "../types/Api";
+import type { ApiLoginDesafio, ApiUsuario } from "../types/Api";
 
 interface AuthContextValue {
   usuario: ApiUsuario | null;
   carregando: boolean;
-  entrar: (email: string, senha: string) => Promise<void>;
+  // 1ª etapa: confere e-mail e senha, devolve o desafio do autenticador (MFA)
+  entrar: (email: string, senha: string) => Promise<ApiLoginDesafio>;
+  // 2ª etapa: confere o código de 6 dígitos e só aí conclui o login
+  confirmarMfa: (loginToken: string, codigo: string) => Promise<void>;
   sair: () => void;
 }
 
@@ -31,13 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setCarregando(false));
   }, [sair]);
 
-  const entrar = async (email: string, senha: string) => {
-    const resposta = await api.post<{ token: string; usuario: ApiUsuario }>("/auth/login", { email, senha });
+  const entrar = (email: string, senha: string) => api.post<ApiLoginDesafio>("/auth/login", { email, senha });
+
+  const confirmarMfa = async (loginToken: string, codigo: string) => {
+    const resposta = await api.post<{ token: string; usuario: ApiUsuario }>("/auth/login/confirmar", { loginToken, codigo });
     salvarToken(resposta.token);
     setUsuario(resposta.usuario);
   };
 
-  return <AuthContext.Provider value={{ usuario, carregando, entrar, sair }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ usuario, carregando, entrar, confirmarMfa, sair }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

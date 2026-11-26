@@ -15,6 +15,13 @@ export interface ApiUsuario {
   ativo: boolean;
 }
 
+// POST /auth/login: a senha já foi conferida, falta o código do autenticador (MFA)
+export interface ApiLoginDesafio {
+  status: "CONFIGURAR_MFA" | "INFORMAR_CODIGO";
+  loginToken: string;
+  otpauthUri: string | null;
+}
+
 export interface ApiProduto {
   id: number;
   codigo: string;

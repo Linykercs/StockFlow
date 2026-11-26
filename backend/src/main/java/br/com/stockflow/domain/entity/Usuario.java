@@ -33,6 +33,12 @@ public class Usuario {
 
     private boolean ativo = true;
 
+    @Column(name = "mfa_secret")
+    private String mfaSecret;
+
+    @Column(name = "mfa_ativo")
+    private boolean mfaAtivo = false;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

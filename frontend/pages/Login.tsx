@@ -4,21 +4,39 @@ import { useNavigate } from "react-router-dom";
 import logo from "../src/assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { mensagemDeErro } from "../services/api";
+import type { ApiLoginDesafio } from "../types/Api";
+import DesafioMfa from "../Components/DesafioMfa";
 
 function Login() {
   const navigate = useNavigate();
-  const { entrar } = useAuth();
+  const { entrar, confirmarMfa } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
+  const [desafio, setDesafio] = useState<ApiLoginDesafio | null>(null);
+  const [destino, setDestino] = useState("/painel");
 
-  const login = async (destino: string) => {
+  const login = async (destinoEscolhido: string) => {
     if (!email.trim() || !password.trim()) { setError("Informe seu e-mail e senha para continuar."); return; }
     setSending(true);
     try {
-      await entrar(email.trim(), password);
+      setDesafio(await entrar(email.trim(), password));
+      setDestino(destinoEscolhido);
+      setError("");
+    } catch (erro) {
+      setError(mensagemDeErro(erro));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const confirmar = async (codigo: string) => {
+    if (!desafio) return;
+    setSending(true);
+    try {
+      await confirmarMfa(desafio.loginToken, codigo);
       navigate(destino);
     } catch (erro) {
       setError(mensagemDeErro(erro));
@@ -31,6 +49,10 @@ function Login() {
     event.preventDefault();
     login("/painel");
   };
+
+  if (desafio) {
+    return <DesafioMfa desafio={desafio} error={error} sending={sending} onConfirmar={confirmar} onVoltar={() => { setDesafio(null); setError(""); }} />;
+  }
 
   return (
     <main className="min-h-screen bg-bege md:grid md:grid-cols-[43%_57%]">
